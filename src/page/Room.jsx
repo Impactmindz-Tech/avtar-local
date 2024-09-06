@@ -3,7 +3,6 @@ import socket from "@/utills/socket/Socket";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import videoDemo from "../assets/videos/demo.mp4";
 
 const Room = () => {
     const { peer, createOffer, createAnswer, setRemoteAnswer, sendStream } = usePeer();
@@ -41,9 +40,9 @@ const Room = () => {
         }
     }, [myStream]);
 
- useEffect(()=>{
-    getUserMediaStream();
- },[getUserMediaStream])
+    useEffect(() => {
+        getUserMediaStream();
+    }, [getUserMediaStream]);
 
     useEffect(() => {
         if (remoteStream && remoteVideoRef.current) {
@@ -171,80 +170,34 @@ const Room = () => {
             setMessageInput("");
         }
     };
-    useEffect(() => {
-        if (myStream && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = myStream;
-        }
-    }, [myStream]);
+
     return (
         <div className="container mx-auto p-4 z-[1] flex flex-wrap flex-col relative before:block before:absolute before:-inset-0 before:bg-black/10 before:z-[-1] h-svh">
             <h2 className="text-2xl font-bold mb-4">Live Streaming Room</h2>
-            {!isStreaming && roomId === "" && (
-                <div>
-                    <h3 className="text-xl font-semibold mt-4 mb-2">Join a Stream</h3>
-                    <input
-                        type="text"
-                        value={joinRoomId}
-                        onChange={(e) => setJoinRoomId(e.target.value)}
-                        placeholder="Enter Room ID to join"
-                        className="border-2 border-gray-300 p-2 rounded mr-2"
-                    />
-                    <button
-                        onClick={() => {
-                            setRoomId(joinRoomId);
-                            socket.emit("join-room", { roomId: joinRoomId, viewerId: socket.id });
-                        }}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        Join
-                    </button>
-                    <h3 className="text-xl font-semibold mt-4 mb-2">Live Streamers</h3>
-                    <div className="flex flex-wrap">
-                        {liveStreamers.map((streamer) => (
-                            <div key={streamer.id} className="m-2 text-center">
-                                <div
-                                    className="w-12 h-12 rounded-full bg-red-500 flex justify-center items-center text-white cursor-pointer"
-                                    onClick={() => {
-                                        setJoinRoomId(streamer.roomId);
-                                        // joinStream();
-                                    }}
-                                >
-                                    Live
-                                </div>
-                                <p className="mt-1">Click to join (ID: {streamer.roomId})</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-            {isStreaming && (
-                <div className="mt-4">
-                    <h3 className="text-xl font-semibold mb-2">
-                        Your Stream {roomId && `(Room ID: ${roomId})`}
-                    </h3>
+
+            <div className="flex justify-between">
+                <div className="w-1/2 pr-2">
+                    <h3 className="text-xl font-semibold mb-2">Your Stream</h3>
                     <video
                         ref={localVideoRef}
                         autoPlay
                         playsInline
                         muted
-                        className="w-full absolute inset-0 h-svh object-cover z-[-2]"
+                        className="w-full h-64 object-cover"
                     />
-                    <p className="mt-2">Viewers: {viewers.length}</p>
                 </div>
-            )}
-            {!isStreaming && roomId !== "" && (
-                <div className="mt-4">
-                    <h3 className="text-xl font-semibold mb-2">
-                        Viewing Stream (Room ID: {roomId})
-                    </h3>
+
+                <div className="w-1/2 pl-2">
+                    <h3 className="text-xl font-semibold mb-2">Remote Stream</h3>
                     <video
                         ref={remoteVideoRef}
                         autoPlay
                         playsInline
-                        className="w-full absolute inset-0 h-svh object-cover z-[-2]"
+                        className="w-full h-64 object-cover"
                     />
                 </div>
-            )}
+            </div>
+
             <div className="mt-auto">
                 <h3 className="text-xl font-semibold mb-2">Chat</h3>
                 <div className="h-48 overflow-y-scroll border border-gray-300 p-2 mb-2">
@@ -267,7 +220,6 @@ const Room = () => {
                 >
                     Send
                 </button>
-                
             </div>
         </div>
     );
