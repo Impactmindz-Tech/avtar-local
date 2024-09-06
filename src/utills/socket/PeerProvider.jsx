@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 
+// Create a context for Peer connections
 const PeerContext = createContext(null);
 
+// Custom hook to use the Peer context
 export const usePeer = () => useContext(PeerContext);
 
+// PeerProvider component that provides WebRTC-related functionality
 export const PeerProvider = ({ children }) => {
-    const [remoteStream, setRemoteStream] = useState(null);
-    const [iceCandidates, setIceCandidates] = useState([]);
+    const [remoteStream, setRemoteStream] = useState(null);  // State to hold the remote stream
+    const [iceCandidates, setIceCandidates] = useState([]);  // State to hold ICE candidates
 
-    // Setup the RTCPeerConnection with STUN servers
+    // Create a new RTCPeerConnection with STUN servers for ICE candidate gathering
     const peer = useMemo(() => new RTCPeerConnection({
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
@@ -17,88 +20,85 @@ export const PeerProvider = ({ children }) => {
         ],
     }), []);
 
+    // Handle ICE candidates as they are discovered and store them for sending to the other peer
     useEffect(() => {
-        // Handle ICE candidates as they are discovered
         const handleIceCandidate = (event) => {
             if (event.candidate) {
-                // Store ICE candidates to send to the other peer
-                setIceCandidates((prev) => [...prev, event.candidate]);
+                setIceCandidates((prev) => [...prev, event.candidate]);  // Add new ICE candidate to state
             }
         };
 
-        peer.onicecandidate = handleIceCandidate;
+        peer.onicecandidate = handleIceCandidate;  // Attach the ICE candidate handler
 
         return () => {
-            peer.onicecandidate = null;
+            peer.onicecandidate = null;  // Cleanup the ICE candidate handler on unmount
         };
     }, [peer]);
 
-    // Create an offer and set local description
+    // Function to create an offer and set it as the local description
     const createOffer = async () => {
         try {
-            const offer = await peer.createOffer();
-            await peer.setLocalDescription(offer);
+            const offer = await peer.createOffer();  // Create the WebRTC offer
+            await peer.setLocalDescription(offer);  // Set the offer as the local description
 
-            // Once local description is set, you can send the offer to the viewer
-            return offer;
+            return offer;  // Return the offer to send to the other peer
         } catch (error) {
             console.error('Error creating offer:', error);
         }
     };
 
-    // Create an answer when receiving an offer and set remote description
+    // Function to create an answer and set it as the local description after receiving an offer
     const createAnswer = async (offer) => {
         try {
             await peer.setRemoteDescription(offer);  // Set the received offer as the remote description
-            const answer = await peer.createAnswer();  // Create the answer
+            const answer = await peer.createAnswer();  // Create the WebRTC answer
             await peer.setLocalDescription(answer);  // Set the answer as the local description
 
-            // Once local description is set, you can send the answer back to the streamer
-            return answer;
+            return answer;  // Return the answer to send to the other peer
         } catch (error) {
             console.error('Error creating answer:', error);
         }
     };
 
-    // Set the remote answer after receiving it
+    // Function to set the remote answer after receiving it
     const setRemoteAnswer = async (answer) => {
         try {
-            await peer.setRemoteDescription(answer);
+            await peer.setRemoteDescription(answer);  // Set the remote description with the received answer
         } catch (error) {
             console.error('Error setting remote answer:', error);
         }
     };
 
-    // Add local media (stream) tracks to the peer connection
+    // Function to send local stream by adding its tracks to the peer connection
     const sendStream = (stream) => {
-        stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+        stream.getTracks().forEach((track) => peer.addTrack(track, stream));  // Add each track to the peer connection
     };
 
-    // Listen for the remote stream and set it when tracks are received
+    // Handle the reception of remote tracks and store them in the remoteStream state
     useEffect(() => {
         const handleTrackEvent = (event) => {
             setRemoteStream((prevStream) => {
                 if (!prevStream) {
-                    // Create a new stream object to attach the received tracks
+                    // If no stream exists, create a new one and add the received track
                     const newStream = new MediaStream();
                     newStream.addTrack(event.track);
                     return newStream;
                 } else {
-                    // If we already have a stream, add the new track to it
+                    // If a stream already exists, add the new track to it
                     prevStream.addTrack(event.track);
                     return prevStream;
                 }
             });
         };
 
-        peer.ontrack = handleTrackEvent;
+        peer.ontrack = handleTrackEvent;  // Attach the track event handler
 
         return () => {
-            peer.ontrack = null;
+            peer.ontrack = null;  // Cleanup the track handler on unmount
         };
     }, [peer]);
 
-    // Return the peer context with all relevant WebRTC methods
+    // Provide the WebRTC methods and state to the component tree
     return (
         <PeerContext.Provider value={{ peer, createOffer, createAnswer, setRemoteAnswer, sendStream, remoteStream, iceCandidates }}>
             {children}
