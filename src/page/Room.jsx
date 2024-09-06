@@ -3,7 +3,6 @@ import socket from "@/utills/socket/Socket";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import videoDemo from "../assets/videos/demo.mp4";
 
 const Room = () => {
     const { peer, createOffer, createAnswer, setRemoteAnswer, sendStream } = usePeer();
@@ -34,16 +33,16 @@ const Room = () => {
             alert("Camera and microphone access could not be granted. Please check the permissions.");
         }
     }, []);
-    
+
     useEffect(() => {
         if (myStream && localVideoRef.current && !localVideoRef.current.srcObject) {
             localVideoRef.current.srcObject = myStream;
         }
     }, [myStream]);
 
- useEffect(()=>{
-    getUserMediaStream();
- },[getUserMediaStream])
+    useEffect(() => {
+        getUserMediaStream();
+    }, [getUserMediaStream]);
 
     useEffect(() => {
         if (remoteStream && remoteVideoRef.current) {
@@ -57,6 +56,9 @@ const Room = () => {
             setIsStreaming(true);
             sendStream(stream);
             stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+
+            const offer = await createOffer();
+            socket.emit("send-offer", { offer, roomId });
         }
     };
 
@@ -121,7 +123,7 @@ const Room = () => {
                 setIsStreaming(false);
                 setRoomId("");
                 setRemoteStream(null);
-                alert("The stream has ended. It stopped from the avatar side.");
+                alert("The stream has ended.");
             }
         };
 
@@ -133,14 +135,6 @@ const Room = () => {
         socket.on("new-message", handleNewMessage);
         socket.on("stream-ended", handleStreamEnded);
 
-        peer.ontrack = (event) => {
-            setRemoteStream((prevStream) => {
-                const updatedStream = new MediaStream(prevStream?.getTracks() || []);
-                updatedStream.addTrack(event.track);
-                return updatedStream;
-            });
-        };
-
         return () => {
             socket.off("room-created", handleRoomCreated);
             socket.off("viewer-joined", handleViewerJoined);
@@ -150,16 +144,7 @@ const Room = () => {
             socket.off("new-message", handleNewMessage);
             socket.off("stream-ended", handleStreamEnded);
         };
-    }, [
-        socket,
-        peer,
-        createOffer,
-        createAnswer,
-        setRemoteAnswer,
-        isStreaming,
-        roomId,
-        myStream,
-    ]);
+    }, [peer, createOffer, createAnswer, setRemoteAnswer, isStreaming, roomId, myStream]);
 
     const handleSendMessage = () => {
         if (messageInput.trim()) {
@@ -171,13 +156,9 @@ const Room = () => {
             setMessageInput("");
         }
     };
-    useEffect(() => {
-        if (myStream && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = myStream;
-        }
-    }, [myStream]);
+
     return (
-        <div className="container mx-auto p-4 z-[1] flex flex-wrap flex-col relative before:block before:absolute before:-inset-0 before:bg-black/10 before:z-[-1] h-svh">
+        <div className="container mx-auto p-4 z-[1] flex flex-wrap flex-col relative h-svh">
             <h2 className="text-2xl font-bold mb-4">Live Streaming Room</h2>
             {!isStreaming && roomId === "" && (
                 <div>
@@ -198,23 +179,6 @@ const Room = () => {
                     >
                         Join
                     </button>
-                    <h3 className="text-xl font-semibold mt-4 mb-2">Live Streamers</h3>
-                    <div className="flex flex-wrap">
-                        {liveStreamers.map((streamer) => (
-                            <div key={streamer.id} className="m-2 text-center">
-                                <div
-                                    className="w-12 h-12 rounded-full bg-red-500 flex justify-center items-center text-white cursor-pointer"
-                                    onClick={() => {
-                                        setJoinRoomId(streamer.roomId);
-                                        // joinStream();
-                                    }}
-                                >
-                                    Live
-                                </div>
-                                <p className="mt-1">Click to join (ID: {streamer.roomId})</p>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             )}
             {isStreaming && (
@@ -227,21 +191,19 @@ const Room = () => {
                         autoPlay
                         playsInline
                         muted
-                        className="w-full absolute inset-0 h-svh object-cover z-[-2]"
+                        className="w-full object-cover h-svh"
                     />
                     <p className="mt-2">Viewers: {viewers.length}</p>
                 </div>
             )}
             {!isStreaming && roomId !== "" && (
                 <div className="mt-4">
-                    <h3 className="text-xl font-semibold mb-2">
-                        Viewing Stream (Room ID: {roomId})
-                    </h3>
+                    <h3 className="text-xl font-semibold mb-2">Viewing Stream (Room ID: {roomId})</h3>
                     <video
                         ref={remoteVideoRef}
                         autoPlay
                         playsInline
-                        className="w-full absolute inset-0 h-svh object-cover z-[-2]"
+                        className="w-full object-cover h-svh"
                     />
                 </div>
             )}
@@ -259,7 +221,7 @@ const Room = () => {
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     placeholder="Type a message..."
-                    className="bg-[#E5E5E5]/30 border-2 px-4 placeholder-white font-medium border-[#E5E5E5]/40 rounded-full text-base sm:text-sm text-white w-full h-[46px]"
+                    className="border-2 px-4 placeholder-black font-medium border-gray-300 rounded-full text-base w-full h-[46px]"
                 />
                 <button
                     onClick={handleSendMessage}
@@ -267,7 +229,6 @@ const Room = () => {
                 >
                     Send
                 </button>
-                
             </div>
         </div>
     );

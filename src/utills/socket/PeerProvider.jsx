@@ -64,33 +64,23 @@ export const PeerProvider = ({ children }) => {
         }
     };
 
-    const sendStream = async (stream) => {
+    const sendStream = (stream) => {
         stream.getTracks().forEach((track) => {
-            // Only add the track if it is not already being sent
-            if (!peer.getSenders().find(sender => sender.track === track)) {
-                console.log('Adding track:', track);
+            if (!peer.getSenders().find((sender) => sender.track === track)) {
                 peer.addTrack(track, stream);
             }
         });
     };
 
     useEffect(() => {
-        const handleTrackEvent = (event) => {
-            if (event.streams && event.streams[0]) {
-                console.log('Remote stream received:', event.streams[0]);
-                setRemoteStream(event.streams[0]);
-            }
-        };
-
-        peer.ontrack = handleTrackEvent;
-
-        return () => {
-            peer.ontrack = null;
+        peer.ontrack = (event) => {
+            const [remoteStream] = event.streams;
+            setRemoteStream(remoteStream);
         };
     }, [peer]);
 
     return (
-        <PeerContext.Provider value={{ peer, createOffer, createAnswer, setRemoteAnswer, sendStream, remoteStream, iceCandidates }}>
+        <PeerContext.Provider value={{ peer, createOffer, createAnswer, setRemoteAnswer, sendStream, remoteStream }}>
             {children}
         </PeerContext.Provider>
     );
