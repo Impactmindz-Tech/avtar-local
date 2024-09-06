@@ -9,10 +9,7 @@ const Room = () => {
     const [myStream, setMyStream] = useState(null);
     const [isStreaming, setIsStreaming] = useState(false);
     const [roomId, setRoomId] = useState("");
-    const [liveStreamers, setLiveStreamers] = useState([]);
     const [viewers, setViewers] = useState([]);
-    const [messages, setMessages] = useState([]);
-    const [messageInput, setMessageInput] = useState("");
     const [remoteStream, setRemoteStream] = useState(null);
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
@@ -55,7 +52,7 @@ const Room = () => {
             setIsStreaming(true);
             sendStream(stream); // Send stream to peer connection
             stream.getTracks().forEach((track) => peer.addTrack(track, stream));
-            
+
             // Notify viewers that the stream is available
             socket.emit("stream-started", { roomId, stream });
         }
@@ -63,11 +60,28 @@ const Room = () => {
 
     const joinStream = () => {
         socket.emit("join-room", { roomId: params?.id, viewerId: socket.id });
+
         // Trigger listener to start receiving remote stream
-        socket.on("receive-stream", (stream) => {
-            // Set the remote stream for viewing
-            setRemoteStream(stream);
+        socket.on("receive-offer", async ({ offer }) => {
+            const answer = await createAnswer(offer);
+            socket.emit("send-answer", { roomId, answer });
         });
+
+        // Handle ICE candidates sent from the streamer
+        socket.on("receive-ice-candidate", ({ candidate }) => {
+            if (candidate) {
+                peer.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        });
+
+        // Set the remote stream
+        peer.ontrack = (event) => {
+            setRemoteStream((prevStream) => {
+                const updatedStream = new MediaStream(prevStream?.getTracks() || []);
+                updatedStream.addTrack(event.track);
+                return updatedStream;
+            });
+        };
     };
 
     useEffect(() => {
@@ -97,53 +111,30 @@ const Room = () => {
                 socket.emit("send-offer", { viewerId, offer, roomId });
             }
         };
-    
-        const handleReceiveOffer = async (data) => {
-            const { offer } = data;
-            const answer = await createAnswer(offer);
-            socket.emit("send-answer", { roomId, answer });
-        };
-    
+
+        // Handle receiving answer from the viewer
         const handleReceiveAnswer = async (data) => {
             const { answer } = data;
             await setRemoteAnswer(answer);
         };
-    
-        const handleStreamReceived = (stream) => {
-            setRemoteStream(stream); // Set the stream as the remote stream
-        };
-    
-        socket.on("viewer-joined", handleViewerJoined);
-        socket.on("receive-offer", handleReceiveOffer);
-        socket.on("receive-answer", handleReceiveAnswer);
-        socket.on("receive-stream", handleStreamReceived); // Listen for the stream
-    
-        peer.ontrack = (event) => {
-            setRemoteStream((prevStream) => {
-                const updatedStream = new MediaStream(prevStream?.getTracks() || []);
-                updatedStream.addTrack(event.track);
-                return updatedStream;
-            });
-        };
-    
-        return () => {
-            socket.off("viewer-joined", handleViewerJoined);
-            socket.off("receive-offer", handleReceiveOffer);
-            socket.off("receive-answer", handleReceiveAnswer);
-            socket.off("receive-stream", handleStreamReceived); // Clean up listener
-        };
-    }, [peer, createOffer, createAnswer, setRemoteAnswer, isStreaming, roomId, myStream]);
 
-    const handleSendMessage = () => {
-        if (messageInput.trim()) {
-            socket.emit("send-message", {
-                roomId,
-                viewerId: socket.id,
-                message: messageInput,
-            });
-            setMessageInput("");
-        }
-    };
+        // Handle ICE candidates received from the viewer
+        socket.on("receive-answer", handleReceiveAnswer);
+
+        peer.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit("send-ice-candidate", {
+                    roomId,
+                    targetId: socket.id,
+                    candidate: event.candidate,
+                });
+            }
+        };
+
+        return () => {
+            socket.off("receive-answer", handleReceiveAnswer);
+        };
+    }, [peer, createOffer, setRemoteAnswer, isStreaming, roomId, myStream]);
 
     return (
         <div className="container mx-auto p-4">
@@ -163,30 +154,12 @@ const Room = () => {
                 </div>
             )}
 
-{!isStreaming && remoteStream && (
-    <div>
-        <h3>Viewing Stream (Room ID: {roomId})</h3>
-        <video ref={remoteVideoRef} autoPlay playsInline className="w-full" />
-    </div>
-)}
-
-            <div>
-                <h3>Chat</h3>
+            {!isStreaming && remoteStream && (
                 <div>
-                    {messages.map((msg, index) => (
-                        <p key={index}>
-                            <strong>{msg.viewerId}:</strong> {msg.message}
-                        </p>
-                    ))}
+                    <h3>Viewing Stream (Room ID: {roomId})</h3>
+                    <video ref={remoteVideoRef} autoPlay playsInline className="w-full" />
                 </div>
-                <input
-                    type="text"
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    placeholder="Type a message..."
-                />
-                <button onClick={handleSendMessage}>Send</button>
-            </div>
+            )}
         </div>
     );
 };
