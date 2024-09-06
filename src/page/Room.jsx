@@ -15,18 +15,22 @@ const Room = () => {
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState("");
     const [remoteStream, setRemoteStream] = useState(null);
-    const localVideoRef = useRef(null);
-    const remoteVideoRef = useRef(null);
+    const localVideoRef = useRef(null);  // Reference for the local video
+    const remoteVideoRef = useRef(null); // Reference for the remote video
     const roomIdMain = useSelector((state) => state.video.stream);
     const params = useParams();
 
+    // Function to get the user's media stream (camera and mic)
     const getUserMediaStream = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: true,
                 audio: true,
             });
-            setMyStream(stream);
+            setMyStream(stream);  // Store the stream
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = stream; // Display the local stream
+            }
             return stream;
         } catch (error) {
             console.error("Error accessing media devices:", error);
@@ -34,27 +38,24 @@ const Room = () => {
         }
     }, []);
 
-    useEffect(() => {
-        if (myStream && localVideoRef.current && !localVideoRef.current.srcObject) {
-            localVideoRef.current.srcObject = myStream;
-        }
-    }, [myStream]);
-
+    // When the component mounts, get the user's media stream
     useEffect(() => {
         getUserMediaStream();
     }, [getUserMediaStream]);
 
     useEffect(() => {
-        if (remoteStream && remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = remoteStream;
+        if (myStream && localVideoRef.current) {
+            localVideoRef.current.srcObject = myStream;
         }
-    }, [remoteStream]);
+    }, [myStream]);
 
     const startStream = async () => {
         const stream = await getUserMediaStream();
         if (stream) {
             setIsStreaming(true);
-            sendStream(stream); // Sending stream to the peer connection
+            sendStream(stream); // Send the stream to the peer connection
+
+            // Add tracks to peer connection
             stream.getTracks().forEach((track) => peer.addTrack(track, stream));
         }
     };
