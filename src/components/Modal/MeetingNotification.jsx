@@ -17,6 +17,8 @@ const MeetingNotification = ({ data }) => {
   const onJoin = () => {
     const data = notificationData.roomId;
     window.location.href = `/room/${data}`;
+    setNotificationData(null);
+    localStorage.removeItem("notificationData");
   };
 
   const onCancel = () => {
