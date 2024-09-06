@@ -48,26 +48,26 @@ const Room = () => {
             remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [remoteStream]);
+
     const startStream = async () => {
         const stream = await getUserMediaStream();
         if (stream) {
             setIsStreaming(true);
-            sendStream(stream);
-    
-            // Check if the tracks are already added
-            stream.getTracks().forEach((track) => {
-                const senders = peer.getSenders();
-                const isTrackAlreadyAdded = senders.find(sender => sender.track === track);
-    
-                if (!isTrackAlreadyAdded) {
-                    peer.addTrack(track, stream);
-                }
-            });
+            sendStream(stream); // Send stream to peer connection
+            stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+            
+            // Notify viewers that the stream is available
+            socket.emit("stream-started", { roomId, stream });
         }
     };
 
     const joinStream = () => {
         socket.emit("join-room", { roomId: params?.id, viewerId: socket.id });
+        // Trigger listener to start receiving remote stream
+        socket.on("receive-stream", (stream) => {
+            // Set the remote stream for viewing
+            setRemoteStream(stream);
+        });
     };
 
     useEffect(() => {
@@ -91,28 +91,33 @@ const Room = () => {
         const handleViewerJoined = async (data) => {
             const { viewerId, totalViewers } = data;
             setViewers(totalViewers);
-
+    
             if (isStreaming && myStream) {
                 const offer = await createOffer();
                 socket.emit("send-offer", { viewerId, offer, roomId });
             }
         };
-
+    
         const handleReceiveOffer = async (data) => {
             const { offer } = data;
             const answer = await createAnswer(offer);
             socket.emit("send-answer", { roomId, answer });
         };
-
+    
         const handleReceiveAnswer = async (data) => {
             const { answer } = data;
             await setRemoteAnswer(answer);
         };
-
+    
+        const handleStreamReceived = (stream) => {
+            setRemoteStream(stream); // Set the stream as the remote stream
+        };
+    
         socket.on("viewer-joined", handleViewerJoined);
         socket.on("receive-offer", handleReceiveOffer);
         socket.on("receive-answer", handleReceiveAnswer);
-
+        socket.on("receive-stream", handleStreamReceived); // Listen for the stream
+    
         peer.ontrack = (event) => {
             setRemoteStream((prevStream) => {
                 const updatedStream = new MediaStream(prevStream?.getTracks() || []);
@@ -120,11 +125,12 @@ const Room = () => {
                 return updatedStream;
             });
         };
-
+    
         return () => {
             socket.off("viewer-joined", handleViewerJoined);
             socket.off("receive-offer", handleReceiveOffer);
             socket.off("receive-answer", handleReceiveAnswer);
+            socket.off("receive-stream", handleStreamReceived); // Clean up listener
         };
     }, [peer, createOffer, createAnswer, setRemoteAnswer, isStreaming, roomId, myStream]);
 
@@ -157,12 +163,12 @@ const Room = () => {
                 </div>
             )}
 
-            {!isStreaming && remoteStream && (
-                <div>
-                    <h3>Viewing Stream (Room ID: {roomId})</h3>
-                    <video ref={remoteVideoRef} autoPlay playsInline className="w-full" />
-                </div>
-            )}
+{!isStreaming && remoteStream && (
+    <div>
+        <h3>Viewing Stream (Room ID: {roomId})</h3>
+        <video ref={remoteVideoRef} autoPlay playsInline className="w-full" />
+    </div>
+)}
 
             <div>
                 <h3>Chat</h3>
