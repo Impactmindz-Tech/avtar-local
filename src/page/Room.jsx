@@ -5,21 +5,20 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 const Room = () => {
-    const { peer, createOffer, createAnswer, setRemoteAnswer, sendStream } = usePeer();  // Peer functionalities from custom hook
+    const { peer, createOffer, createAnswer, setRemoteAnswer, sendStream } = usePeer();
     const [myStream, setMyStream] = useState(null);
     const [isStreaming, setIsStreaming] = useState(false);
     const [roomId, setRoomId] = useState("");
+    const [liveStreamers, setLiveStreamers] = useState([]);
     const [viewers, setViewers] = useState([]);
-    const [messages, setMessages] = useState([]);  // Chat messages state
-    const [messageInput, setMessageInput] = useState("");  // Chat input state
+    const [messages, setMessages] = useState([]);
+    const [messageInput, setMessageInput] = useState("");
     const [remoteStream, setRemoteStream] = useState(null);
+    const localVideoRef = useRef(null);
+    const remoteVideoRef = useRef(null);
+    const roomIdMain = useSelector((state) => state.video.stream);
+    const params = useParams();
 
-    const localVideoRef = useRef(null);  // Reference to local video element
-    const remoteVideoRef = useRef(null);  // Reference to remote video element
-    const roomIdMain = useSelector((state) => state.video.stream);  // Room ID from Redux state
-    const params = useParams();  // Room ID from URL parameters
-
-    // Get local media stream (camera and microphone)
     const getUserMediaStream = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -35,47 +34,41 @@ const Room = () => {
     }, []);
 
     useEffect(() => {
-        // Attach the local video stream to the video element
         if (myStream && localVideoRef.current && !localVideoRef.current.srcObject) {
             localVideoRef.current.srcObject = myStream;
         }
     }, [myStream]);
 
     useEffect(() => {
-        // Get user media stream on component mount
         getUserMediaStream();
     }, [getUserMediaStream]);
 
     useEffect(() => {
-        // Attach the remote stream to the remote video element
         if (remoteStream && remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [remoteStream]);
 
-    // Start streaming when the broadcaster creates a room
     const startStream = async () => {
         const stream = await getUserMediaStream();
         if (stream) {
             setIsStreaming(true);
-            sendStream(stream);  // Send stream through WebRTC
-            stream.getTracks().forEach((track) => peer.addTrack(track, stream));  // Add tracks to peer connection
+            sendStream(stream);
+            stream.getTracks().forEach((track) => peer.addTrack(track, stream));
         }
     };
 
-    // Join the stream as a viewer
     const joinStream = () => {
         socket.emit("join-room", { roomId: params?.id, viewerId: socket.id });
     };
 
     useEffect(() => {
-        // Handle room creation and joining
         const handleRoomCreated = (data) => {
             setRoomId(data.roomId);
             if (socket.id === data.streamerId) {
-                startStream();  // Start stream if user is the broadcaster
+                startStream();
             } else {
-                joinStream();  // Join stream as viewer
+                joinStream();
             }
         };
 
@@ -84,43 +77,38 @@ const Room = () => {
         return () => {
             socket.off("room-created", handleRoomCreated);
         };
-    }, [startStream, joinStream]);
+    }, [startStream, joinStream, socket]);
 
     useEffect(() => {
-        // Handle viewer joining
         const handleViewerJoined = async (data) => {
             const { viewerId, totalViewers } = data;
-            setViewers(totalViewers);  // Update viewer count
+            setViewers(totalViewers);
 
             if (isStreaming && myStream) {
-                const offer = await createOffer();  // Create WebRTC offer
-                socket.emit("send-offer", { viewerId, offer, roomId });  // Send offer to viewer
+                const offer = await createOffer();
+                socket.emit("send-offer", { viewerId, offer, roomId });
             }
         };
 
-        // Handle receiving offer (from broadcaster) as a viewer
         const handleReceiveOffer = async (data) => {
             const { offer } = data;
-            const answer = await createAnswer(offer);  // Create WebRTC answer
-            socket.emit("send-answer", { roomId, answer });  // Send answer back to broadcaster
+            const answer = await createAnswer(offer);
+            socket.emit("send-answer", { roomId, answer });
         };
 
-        // Handle receiving answer (from viewer) as the broadcaster
         const handleReceiveAnswer = async (data) => {
             const { answer } = data;
-            await setRemoteAnswer(answer);  // Set remote description with the received answer
+            await setRemoteAnswer(answer);
         };
 
-        // Listen for the various socket events
         socket.on("viewer-joined", handleViewerJoined);
         socket.on("receive-offer", handleReceiveOffer);
         socket.on("receive-answer", handleReceiveAnswer);
 
-        // Handle receiving remote stream
         peer.ontrack = (event) => {
             setRemoteStream((prevStream) => {
-                const updatedStream = new MediaStream(prevStream?.getTracks() || []);  // Get current tracks
-                updatedStream.addTrack(event.track);  // Add new track to the stream
+                const updatedStream = new MediaStream(prevStream?.getTracks() || []);
+                updatedStream.addTrack(event.track);
                 return updatedStream;
             });
         };
@@ -132,29 +120,14 @@ const Room = () => {
         };
     }, [peer, createOffer, createAnswer, setRemoteAnswer, isStreaming, roomId, myStream]);
 
-    // Chat functionality
-    useEffect(() => {
-        // Listen for new chat messages
-        socket.on("new-message", (messageData) => {
-            setMessages((prevMessages) => [...prevMessages, messageData]);  // Append new messages to the chat
-        });
-
-        return () => {
-            socket.off("new-message");
-        };
-    }, []);
-
     const handleSendMessage = () => {
-        // Send chat message
         if (messageInput.trim()) {
-            const messageData = {
+            socket.emit("send-message", {
                 roomId,
                 viewerId: socket.id,
                 message: messageInput,
-            };
-            socket.emit("send-message", messageData);  // Send message via socket
-            setMessages((prevMessages) => [...prevMessages, messageData]);  // Add message to local state
-            setMessageInput("");  // Clear input field
+            });
+            setMessageInput("");
         }
     };
 
@@ -183,31 +156,22 @@ const Room = () => {
                 </div>
             )}
 
-            {/* Chat Section */}
-            <div className="mt-4">
-                <h3 className="text-xl font-semibold">Chat</h3>
-                <div className="border p-2 h-64 overflow-y-auto">
+            <div>
+                <h3>Chat</h3>
+                <div>
                     {messages.map((msg, index) => (
                         <p key={index}>
                             <strong>{msg.viewerId}:</strong> {msg.message}
                         </p>
                     ))}
                 </div>
-                <div className="flex mt-2">
-                    <input
-                        type="text"
-                        value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
-                        placeholder="Type a message..."
-                        className="flex-1 border p-2"
-                    />
-                    <button
-                        onClick={handleSendMessage}
-                        className="ml-2 bg-blue-500 text-white px-4 py-2"
-                    >
-                        Send
-                    </button>
-                </div>
+                <input
+                    type="text"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    placeholder="Type a message..."
+                />
+                <button onClick={handleSendMessage}>Send</button>
             </div>
         </div>
     );
