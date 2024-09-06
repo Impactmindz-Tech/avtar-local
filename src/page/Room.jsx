@@ -48,13 +48,21 @@ const Room = () => {
             remoteVideoRef.current.srcObject = remoteStream;
         }
     }, [remoteStream]);
-
     const startStream = async () => {
         const stream = await getUserMediaStream();
         if (stream) {
             setIsStreaming(true);
             sendStream(stream);
-            stream.getTracks().forEach((track) => peer.addTrack(track, stream));
+    
+            // Check if the tracks are already added
+            stream.getTracks().forEach((track) => {
+                const senders = peer.getSenders();
+                const isTrackAlreadyAdded = senders.find(sender => sender.track === track);
+    
+                if (!isTrackAlreadyAdded) {
+                    peer.addTrack(track, stream);
+                }
+            });
         }
     };
 
