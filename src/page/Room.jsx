@@ -91,9 +91,9 @@ const Room = () => {
         };
 
         const handleReceiveOffer = async (data) => {
-            const { offer } = data;
+            const { offer, viewerId } = data;
             const answer = await createAnswer(offer);
-            socket.emit("send-answer", { roomId, answer });
+            socket.emit("send-answer", { viewerId, answer });
         };
 
         const handleReceiveAnswer = async (data) => {
