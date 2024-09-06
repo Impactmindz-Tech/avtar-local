@@ -1,0 +1,724 @@
+/* @import url("https://fonts.cdnfonts.com/css/dylan"); */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+/* body {
+  font-family: "Dylan", sans-serif;
+} */
+
+:root {
+  /* h1 style  */
+  --h1-font-size: 20px;
+  --h1-font-weight: 700;
+  /* h3 style  */
+  --h3-font-size: 16px;
+  --h3-font-weight: 700;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 400;
+  color: #2d2d2d;
+}
+
+.input {
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.notification {
+  width: 25%;
+  z-index: 100;
+  background-color: white;
+}
+
+.inputGrayColor {
+  width: 100%;
+  color: #1b1b1b;
+  outline: none;
+  font-weight: 500;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.inputRounded {
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  padding-left: 20px;
+  border: 1px solid #ccc;
+  border-radius: 60px;
+}
+
+.user-top-search input[type="search"] {
+  padding-right: 65px;
+}
+
+.inputRounded2 {
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  padding-left: 50px;
+  border: 1px solid #ccc;
+  border-radius: 60px;
+}
+
+.inputCal {
+  width: 100%;
+  outline: none;
+  padding: 12px;
+  font-weight: 500;
+  color: rgb(43, 43, 43) !important;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.inputCenter {
+  width: 100%;
+  outline: none;
+  padding: 10px;
+  font-weight: 500;
+  text-align: center;
+  color: rgb(43, 43, 43) !important;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+h1 {
+  font-size: var(--h1-font-size);
+  font-weight: var(--h1-font-weight);
+}
+
+h3 {
+  font-size: var(--h3-font-size);
+  font-weight: var(--h3-font-weight);
+}
+
+/* user menu active color manage */
+.css-1h9z7r5-MuiButtonBase-root-MuiTab-root.Mui-selected {
+  font-weight: 700;
+  color: #2d2d2d !important;
+}
+
+.css-1aquho2-MuiTabs-indicator {
+  background-color: #2d2d2d !important;
+}
+
+button.MuiButtonBase-root.MuiTab-root.MuiTab-textColorPrimary.css-1h9z7r5-MuiButtonBase-root-MuiTab-root {
+  color: #ababab;
+}
+
+/* swiper active bg color */
+.swiper-pagination-bullet-active {
+  background: #ffffff !important;
+}
+
+.reportCheckBox {
+  font-weight: 400;
+  cursor: pointer;
+  color: #ababab;
+}
+
+.borderTopBottom {
+  border-top: 1px solid #e2e2e2;
+  border-bottom: 1px solid #e2e2e2;
+}
+
+.borderTop {
+  border-top: 1px solid #e2e2e2;
+}
+
+.centerImageIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  /* Adjust the size of the icon as needed */
+  color: white;
+}
+
+.shape {
+  z-index: 999;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px 13px;
+  color: #ababab;
+  font-family: Arial, sans-serif;
+}
+
+.triangleDown {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 15px solid white;
+}
+
+.cardBorder {
+  border: 1px solid #F1F1F1;
+  border-radius: 20px;
+  /* box-shadow:  0px 1px 4px rgba(112, 112, 112, 0.16); */
+}
+
+.BoxShadow {
+  border: 1px solid #F1F1F1;
+  border-radius: 20px;
+  box-shadow: rgba(134, 134, 134, 0.16) 0px 1px 4px;
+}
+
+.BorderRight {
+  padding-right: 30px;
+  border-right: 1px solid #f1f1f1;
+}
+
+.BoxShadowLessRounded {
+  border: 1px solid #f1f1f1;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.BoxShadowModalTop {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+/* swiper */
+
+.reviewCardSwiper {
+  padding: 0 2px;
+}
+
+.borderRadiusLeftChatRight {
+  border-radius: 10px 10px 0px 10px;
+}
+
+.borderRadiusLeftChatLeft {
+  border-radius: 10px 10px 10px 0px;
+}
+
+/* radio checkbox */
+
+/* PaymentMethod.css */
+/* Custom Radio Button */
+.payment-option {
+  position: relative;
+  cursor: pointer;
+  font-size: 18px;
+  user-select: none;
+}
+
+.payment-option input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.custom-radio {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  /* Adjust to place it properly */
+  height: 25px;
+  width: 25px;
+  background-color: #fff;
+  border: 2px solid #535353;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.payment-option input:checked~.custom-radio {
+  border-color: #000;
+  background-color: #000;
+}
+
+.custom-radio:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.payment-option input:checked~.custom-radio:after {
+  display: block;
+}
+
+.payment-option .custom-radio:after {
+  left: 7px;
+  top: 5px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* time edit modal */
+.time-picker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  user-select: none;
+}
+
+.time-column {
+  margin: 0 10px;
+  padding: 10px;
+  background: #f0f0f0;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* rate tour */
+.rateTourBtn {
+  color: black;
+  padding: 10px 0;
+  width: 100%;
+  border-radius: 5px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  border: 1px solid #e2e2e2;
+}
+
+.rateTourBtnActive {
+  border: 1px solid #2d2d2d;
+}
+
+.rateTourBtn:hover {
+  border: 1px solid #2d2d2d;
+}
+
+/* profileShadow */
+.profileShadow {
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+/* profile */
+.cameraBoxShadow {
+  box-shadow: 0px 0px 0px 5px white;
+}
+
+.loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #e4e4e4a8;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.squareShadow {
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.expShadow {
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+
+button#terms {
+  background-color: #131313 !important;
+}
+
+/* styles.css */
+.form-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #353535;
+  /* gray-400 */
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.form-radio:checked::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: #353535;
+  /* blue-500 */
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cardShadow {
+  border-radius: 10px;
+  border: 1px solid #e2e2e2;
+}
+
+.insta {
+  background: linear-gradient(45deg, #fdd91d 8.39%, #fdd91d 12.55%, #ec1c24 49.77%, #a43a94 87.45%, #a43a94 91.61%);
+}
+
+.data-\[state\=checked\]\:bg-primary[data-state="checked"] {
+  background-color: #2d2d2d !important;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.input-otp-slot {
+  width: 100px;
+  /* Adjust width as needed */
+  height: 50px;
+  /* Adjust height as needed */
+  font-size: 20px;
+  /* Optional: adjust font size */
+  text-align: center;
+  /* Optional: center align text */
+  border: 1px solid #ccc;
+  /* Optional: add border */
+  margin: 5px;
+  /* Optional: add margin */
+}
+
+/* custom css */
+.select-location svg {
+  width: 20px;
+  position: relative;
+  top: -2px;
+}
+
+.simplebar-track.simplebar-vertical {
+  width: 8px;
+}
+
+.chat-user .simplebar-track.simplebar-vertical,
+.chat-with-user .simplebar-track.simplebar-vertical {
+  right: -10px;
+}
+
+.custom-check {
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+}
+
+.custom-check input {
+  width: 18px;
+  height: 18px;
+  opacity: 0;
+}
+
+.custom-check div::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  z-index: -1;
+  border: 1px solid #2d2d2d;
+}
+
+.custom-check div::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 2px;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  width: 5px;
+  height: 11px;
+  transform: rotate(45deg);
+  opacity: 0;
+  z-index: -1;
+}
+
+.custom-check input:checked+div::before {
+  background-color: #2d2d2d;
+}
+
+.custom-check input:checked+div::after {
+  opacity: 1;
+}
+
+.tabs-explore-map button {
+  color: #ABABAB !important;
+}
+
+.tabs-explore-map img {
+  margin-bottom: 10px !important;
+  opacity: 0.6;
+}
+
+.tabs-explore-map button.Mui-selected {
+  color: #2b2b2b !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F2F2F2 133.62%);
+}
+
+.tabs-explore-map button.Mui-selected img {
+  opacity: 1;
+}
+
+/* custom css */
+
+/* 4xl */
+@media (max-width: 2047px) {
+  /* Your CSS rules here */
+}
+
+/* 3xl */
+@media (max-width: 1791px) {}
+
+/* 2xl */
+@media (max-width: 1535px) {}
+
+/* xl */
+@media (max-width: 1279px) {
+  /* Your CSS rules here */
+}
+
+/* lg */
+@media (max-width: 1023px) {
+  /* Your CSS rules here */
+}
+
+/* md */
+@media (max-width: 767px) {}
+
+@media (max-width: 639px) {
+  .tabs-explore-map button {
+    font-size: 10px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+}
+
+/* Assuming you are using Tailwind CSS */
+.border-red-500 {
+  border-color: #f56565;
+  /* Tailwind red-500 color */
+}
+
+/* Or if using regular CSS */
+.input-otp-slot {
+  border: 1px solid #e2e8f0;
+  /* Default border color */
+}
+
+.input-otp-slot.border-red-500 {
+  border-color: #f56565;
+  /* Red border color */
+}
+
+.input_border {
+  border: 0 !important;
+  outline: none !important;
+}
+
+.t-n-p-nav::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+.t-n-p-nav::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+.t-n-p-nav::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+.t-n-p-nav::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.t-n-p-nav .active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  background-color: #ff5454;
+  border-radius: 100px;
+}
+
+.t-n-p-nav {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.t-n-p-nav .active {
+  font-weight: 600;
+}
+
+.t-n-p-nav li+li {
+  margin-top: 8px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.t-n-p-nav svg {
+  display: none;
+}
+
+
+
+.scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+.scroll::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey;
+  border-radius: 10px;
+}
+
+/* Handle */
+.scroll::-webkit-scrollbar-thumb {
+  background: rgb(17, 17, 17);
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+.scroll::-webkit-scrollbar-thumb:hover {
+  background: #b30000;
+}
+
+@media (max-width: 1023px) {
+  .t-n-p-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    padding: 50px 20px 20px;
+    width: 300px;
+    max-width: 100%;
+    transform: translateX(-110%);
+  }
+
+  .show .t-n-p-nav {
+    transform: none;
+    transition: 0.3s ease;
+  }
+
+  .show-anchor-links {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .t-n-p-nav svg {
+    display: block;
+  }
+}
+
+@media (max-width: 551px) {
+  .notification {
+    width: 94%;
+    margin-top: -51px;
+  }
+}
+
+@media (min-width: 552px) and (max-width: 1023px) {
+  .notification {
+    width: 44%;
+  }
+}
+
+
+.past-time-class {
+  opacity: 0.5;
+  background-color: red;
+  cursor: not-allowed;
+  color: white;
+  /* Text color for past time */
+}
