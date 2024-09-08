@@ -9,13 +9,14 @@ const WebRTCStreaming = () => {
   const [videoDevices, setVideoDevices] = useState([]);
   const localVideoRef = useRef(null);
   const videosContainerRef = useRef(null);
+  const[joinId,setJoinId] = useState("");
   const [roomId, setRoomId] = useState("");
   const [localStream, setLocalStream] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [peerConnections, setPeerConnections] = useState({});
   const [isBroadcaster, setIsBroadcaster] = useState(false);
   const params = useParams();
-  
+
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   };
@@ -50,7 +51,7 @@ const WebRTCStreaming = () => {
     socket.on("connect_timeout", handleConnectionError);
 
     socket.on("created", async (room) => {
-      setErrorMessage(`Created room ${room}. Waiting for viewers...`);
+      // setErrorMessage(`Created room ${room}. Waiting for viewers...`);
       setIsBroadcaster(true);
       const stream = await getUserMedia();
       setLocalStream(stream);
@@ -60,7 +61,7 @@ const WebRTCStreaming = () => {
     });
 
     socket.on("joined", async (room) => {
-      setErrorMessage(`Joined room ${room}`);
+      // setErrorMessage(`Joined room ${room}`);
       setIsBroadcaster(false);
       const stream = await getUserMedia(false);
       setLocalStream(stream);
@@ -110,14 +111,18 @@ const WebRTCStreaming = () => {
   setRoomId(generatedRoomId);
     socket.emit("create", generatedRoomId);
   };
-
+ 
   const joinRoom = () => {
+  
     if (!socket.connected) {
       setErrorMessage("Socket is not connected. Unable to join room.");
       return;
     }
-    if (roomId) {
-      socket.emit("join", roomId);
+  
+    const roomid = params?.id;
+    setJoinId(roomid);
+    if (roomid) {
+      socket.emit("join", roomid);
     } else {
       setErrorMessage("Please enter a room ID.");
     }
@@ -226,7 +231,7 @@ const WebRTCStreaming = () => {
   };
 
   const handleMediaError = (error) => {
-    setErrorMessage(`Media Error: ${error.message}`);
+    // setErrorMessage(`Media Error: ${error.message}`);
   };
   navigator.mediaDevices.enumerateDevices().then(gotDevices=>{
     console.log(gotDevices);
@@ -262,34 +267,44 @@ const WebRTCStreaming = () => {
       }
     });
   };
+
 useEffect(()=>{
  if(roomId){
-  return;
+
+  joinRoom();
  }
  else{
   createRoom();
  }
 },[])
-useEffect(()=>{
-  joinRoom();
-},[])
+
   return (
     <div>
-      <h1>WebRTC Video Streaming</h1>
-      <div>
-        {/* <button onClick={createRoom}>Create Stream</button> */}
-        <input
-          type="text"
-          placeholder="Enter room ID"
-          value={roomId}
-          onChange={(e) => setRoomId(e.target.value)}
-        />
-         <button onClick={joinRoom}>Join Stream</button>
-        <div className="controls">
-          <button onClick={stopStream}>Stop Stream</button>
-          <button onClick={exitRoom}>Exit Room</button>
-        </div>
-      </div>
+   
+   <div className="flex flex-col items-center space-y-4 p-4">
+  {isBroadcaster ? '' : 
+    <button 
+      className="bg-blue-500 text-white font-semibold py-2 px-4 rounded shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105"
+      onClick={joinRoom}
+    >
+      Let's Start
+    </button>
+  }
+  <div className="flex space-x-4 mt-4">
+    <button 
+      className="bg-gray-600 text-white font-semibold py-2 px-4 rounded shadow-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition-transform transform hover:scale-105"
+      onClick={stopStream}
+    >
+      Stop Stream
+    </button>
+    <button 
+      className="bg-red-500 text-white font-semibold py-2 px-4 rounded shadow-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-transform transform hover:scale-105"
+      onClick={exitRoom}
+    >
+      Exit Room
+    </button>
+  </div>
+</div>
       <div id="error-message" style={{ color: "red", fontWeight: "bold" }}>
         {errorMessage}
       </div>

@@ -1,30 +1,54 @@
 import Images from "@/constant/Images";
+import { useState } from "react";
 
-const Confirm_Page_Payment = ({ selectedMethod, setSelectedMethod, onchangemethod }) => {
+const Confirm_Page_Payment = ({ onchangemethod }) => {
+  const [selectedMethod, setSelectedMethod] = useState("stripe");
+
   const handleselectmethod = (e) => {
     const method = e.target.value;
     setSelectedMethod(method);
+    onchangemethod(method);
   };
 
   return (
-    <form className="BoxShadowLessRounded m-auto py-2 px-4">
-      <h2 className="text-lg font-medium my-2">Pay with</h2>
+    <form className="BoxShadowLessRounded m-auto p-5">
+      <h2 className="text-lg font-medium my-3">Pay with</h2>
 
-      <div className="space-y-4 mb-4">
-        <label className={`payment-option flex items-center justify-between p-4 border rounded-lg cursor-pointer ${selectedMethod === "paypal" ? "active" : ""}`}>
+      <div className="space-y-4">
+        <label
+          className={`payment-option flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
+            selectedMethod === "paypal" ? "active" : ""
+          }`}
+        >
           <div className="flex items-center">
-            <img src={Images.paypal} alt="PayPal" className="w-6 h-6 mr-2 object-contain" />
+            <img src={Images.paypal} alt="PayPal" className="w-6 h-6 mr-2" />
             <span className="text-sm font-semibold">PayPal</span>
           </div>
-          <input type="radio" name="paymentMethod" value="paypal" onChange={handleselectmethod} className="hidden" />
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="paypal"
+            onChange={handleselectmethod}
+            className="hidden"
+          />
           <div className="custom-radio"></div>
         </label>
-        <label className={`payment-option flex items-center justify-between p-4 border rounded-lg cursor-pointer ${selectedMethod === "stripe" ? "active" : ""}`}>
+        <label
+          className={`payment-option flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
+            selectedMethod === "stripe" ? "active" : ""
+          }`}
+        >
           <div className="flex items-center">
-            <img src={Images.logoStripe} alt="Apple Pay" className="w-6 h-6 mr-2 object-contain" />
+            <img src={Images.applePay} alt="Apple Pay" className="w-6 h-6 mr-2" />
             <span className="text-sm font-semibold">Stripe</span>
           </div>
-          <input type="radio" name="paymentMethod" value="stripe" defaultChecked={true} onChange={handleselectmethod} className="hidden" />
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="stripe"
+            onChange={handleselectmethod}
+            className="hidden"
+          />
           <div className="custom-radio"></div>
         </label>
       </div>

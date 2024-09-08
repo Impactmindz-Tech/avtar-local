@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 const MeetingNotification = ({ data }) => {
   const [notificationData, setNotificationData] = useState(() => {
     // Retrieve notification data from localStorage
@@ -15,8 +15,8 @@ const MeetingNotification = ({ data }) => {
   }, [notificationData]);
 
   const onJoin = () => {
-    const data = notificationData.roomId;
-    window.location.href = `/room/${data}`;
+    const roomId = notificationData.roomId;
+    window.location.href = `/room/${roomId}`;
     setNotificationData(null);
     localStorage.removeItem("notificationData");
   };
