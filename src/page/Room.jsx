@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import { useParams } from "react-router-dom";
 // Replace with your ngrok URL or server URL
-const SOCKET_SERVER_URL = "http://localhost:3000/";
+const SOCKET_SERVER_URL = "https://backend-avatar-local.onrender.com";
 const socket = io(SOCKET_SERVER_URL);
 
 const WebRTCStreaming = () => {
