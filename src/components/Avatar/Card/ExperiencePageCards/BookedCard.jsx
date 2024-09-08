@@ -26,7 +26,7 @@ const BookedCard = ({ item, role }) => {
     const response = await createmeeting(reqdata);
     if (response?.isSuccess) {
       const newRoomId = Math.random().toString(36).substr(2, 9);
-      socket.emit("create-room", { BookingDetails: reqdata, roomId: newRoomId, streamerId: socket.id, item });
+      socket.emit("create-room", { BookingDetails: reqdata, roomId: newRoomId, item });
       navigate(`/room/${newRoomId}`);
     }
   };
