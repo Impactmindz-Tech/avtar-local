@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import { useParams } from "react-router-dom";
 // Replace with your ngrok URL or server URL
-const SOCKET_SERVER_URL = "https://backend-avatar-local.onrender.com/";
+const SOCKET_SERVER_URL = "http://localhost:3000/";
 const socket = io(SOCKET_SERVER_URL);
 
 const WebRTCStreaming = () => {
@@ -14,7 +14,7 @@ const WebRTCStreaming = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [peerConnections, setPeerConnections] = useState({});
   const [isBroadcaster, setIsBroadcaster] = useState(false);
- const params = useParams();
+  const params = useParams();
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   };
@@ -94,7 +94,7 @@ const WebRTCStreaming = () => {
 
   const getUserMedia = async (audio = true) => {
     try {
-      return await navigator.mediaDevices.getUserMedia({ video:{width:{exact:1920},height:{exact:1080}}, audio: audio });
+      return await navigator.mediaDevices.getUserMedia({ video:{width:{ideal:1920},height:{ideal:1080}}, audio: audio });
     } catch (error) {
       handleMediaError(error);
     }
@@ -105,9 +105,9 @@ const WebRTCStreaming = () => {
       setErrorMessage("Socket is not connected. Unable to create room.");
       return;
     }
-    // const generatedRoomId = roomId || Math.random().toString(36).substr(2, 2);
-    setRoomId(params?.id);
-    // socket.emit("create", generatedRoomId);
+    const generatedRoomId = params?.id;
+  setRoomId(generatedRoomId);
+    socket.emit("create", generatedRoomId);
   };
 
   const joinRoom = () => {
@@ -234,25 +234,25 @@ const WebRTCStreaming = () => {
 
   const handleCameraChange = async (event) => {
     const selectedDeviceId = event.target.value;
-  
+
     // Stop the existing video tracks before starting a new one
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
     }
-  
+
     // Get new stream with the selected camera
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: { exact: selectedDeviceId },width:{exact:1920},height:{exact:1080} },
+      video: { deviceId: { exact: selectedDeviceId },width:{ideal:1920},height:{ideal:1080} },
       audio: true // Keep audio as before
     });
-  
+
     // Set the new stream to the video element
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = stream;
     }
-  
+
     setLocalStream(stream); // Update localStream
-  
+
     // Replace the video tracks in peer connections with the new ones
     Object.values(peerConnections).forEach((peerConnection) => {
       const videoSender = peerConnection.getSenders().find((sender) => sender.track.kind === 'video');
@@ -261,21 +261,29 @@ const WebRTCStreaming = () => {
       }
     });
   };
-  useEffect(()=>{
-    createRoom ()
-  },[])
+useEffect(()=>{
+ if(roomId){
+  return;
+ }
+ else{
+  createRoom();
+ }
+},[])
+useEffect(()=>{
+  joinRoom();
+},[])
   return (
     <div>
       <h1>WebRTC Video Streaming</h1>
       <div>
-        <button onClick={createRoom}>Create Stream</button>
+        {/* <button onClick={createRoom}>Create Stream</button>
         <input
           type="text"
           placeholder="Enter room ID"
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
-        />
-        <button onClick={joinRoom}>Join Stream</button>
+        /> */}
+        {/* <button onClick={joinRoom}>Join Stream</button> */}
         <div className="controls">
           <button onClick={stopStream}>Stop Stream</button>
           <button onClick={exitRoom}>Exit Room</button>
@@ -284,7 +292,7 @@ const WebRTCStreaming = () => {
       <div id="error-message" style={{ color: "red", fontWeight: "bold" }}>
         {errorMessage}
       </div>
-   
+
 
       <div id="videos">
         {isBroadcaster?(<>
@@ -298,10 +306,10 @@ const WebRTCStreaming = () => {
           ))}
         </select>
       </div>
-        
+
         <video className="videoStyle" ref={localVideoRef} autoPlay playsInline muted></video></> ):( <div className="videoStyle" ref={videosContainerRef}></div>)}
-       
-       
+
+
       </div>
     </div>
   );
