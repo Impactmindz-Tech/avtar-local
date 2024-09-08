@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import { useParams } from "react-router-dom";
 // Replace with your ngrok URL or server URL
-const SOCKET_SERVER_URL = "https://backend-avatar-local.onrender.com";
+const SOCKET_SERVER_URL = "https://backend-avatar-local.onrender.com/";
 const socket = io(SOCKET_SERVER_URL);
 
 const WebRTCStreaming = () => {
@@ -15,6 +15,7 @@ const WebRTCStreaming = () => {
   const [peerConnections, setPeerConnections] = useState({});
   const [isBroadcaster, setIsBroadcaster] = useState(false);
   const params = useParams();
+  
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   };
@@ -276,14 +277,14 @@ useEffect(()=>{
     <div>
       <h1>WebRTC Video Streaming</h1>
       <div>
-        {/* <button onClick={createRoom}>Create Stream</button>
+        {/* <button onClick={createRoom}>Create Stream</button> */}
         <input
           type="text"
           placeholder="Enter room ID"
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
-        /> */}
-        {/* <button onClick={joinRoom}>Join Stream</button> */}
+        />
+         <button onClick={joinRoom}>Join Stream</button>
         <div className="controls">
           <button onClick={stopStream}>Stop Stream</button>
           <button onClick={exitRoom}>Exit Room</button>
