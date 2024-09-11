@@ -21,8 +21,8 @@ const WebRTCStreaming = () => {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
   };
   useEffect(() => {
-    const SOCKET_SERVER_URL = "https://backend-avatar-local.onrender.com/";
-const socket = io(SOCKET_SERVER_URL);
+//     const SOCKET_SERVER_URL = "https://backend-avatar-local.onrender.com/";
+// const socket = io(SOCKET_SERVER_URL);
     // Fetch the available media devices
     navigator.mediaDevices.enumerateDevices().then(devices => {
       const videoInputDevices = devices.filter(device => device.kind === 'videoinput');
