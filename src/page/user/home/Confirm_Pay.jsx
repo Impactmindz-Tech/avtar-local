@@ -59,7 +59,7 @@ function Confirm_Pay() {
 
   const total = bookingDetails?.data?.priceInfo?.AmountsperMinute * bookingDetails?.data?.priceInfo?.Duration || 0;
   const percentage = (total * bookingDetails?.data?.booking?.Adminfee) / 100 || 0;
-  // let correctPrice=total+parseFloat(bookingDetails?.data?.booking?.Adminfee);
+
   useEffect(() => {
     getBookingDetails();
   }, [params?.id, showEditTimeModal, showEditDateModal]);
@@ -77,7 +77,6 @@ function Confirm_Pay() {
         paymentType: method,
       };
       try {
-        setLoader(true);
         let senddata = await checkout(body);
         console.log(senddata.id);
         const result = stripe.redirectToCheckout({
@@ -85,8 +84,6 @@ function Confirm_Pay() {
         });
       } catch (err) {
         console.log(err);
-      } finally {
-        setLoader(false);
       }
     } else if (method === "paypal") {
       let body = {
@@ -99,7 +96,6 @@ function Confirm_Pay() {
         paymentType: method,
       };
       try {
-        setLoader(true);
         let res = await paypalcheckout(body);
 
         if (res.isSuccess) {
@@ -108,8 +104,6 @@ function Confirm_Pay() {
         }
       } catch (err) {
         console.log(err);
-      } finally {
-        setLoader(false);
       }
     }
   };
@@ -131,9 +125,9 @@ function Confirm_Pay() {
             {/* your events edit card */}
             <div className="flex BoxShadowLessRounded m-auto w-[50%] md:w-full my-5">
               <div className="py-2 px-4 w-full">
-                <h1 className="my-2 font-bold sm:text-base">Your Events</h1>
+                <h1 className="my-2 font-bold">Your Events</h1>
 
-                <div className="relative w-full sm:text-sm">
+                <div className="relative w-full">
                   {/* date */}
                   <div className="flex justify-between items-center">
                     <div className="div">
@@ -173,9 +167,9 @@ function Confirm_Pay() {
             {/* price details card */}
             <div className="flex BoxShadowLessRounded m-auto w-[50%] md:w-full my-5 bg-boxFill-900">
               <div className="py-2 px-4 w-full">
-                <h1 className="my-2 font-bold sm:text-base">Price Details</h1>
+                <h1 className="my-2 font-bold">Price Details</h1>
 
-                <div className="text flex justify-between py-1 sm:text-sm">
+                <div className="text flex justify-between py-1">
                   <div className="title">
                     Price: ${bookingDetails?.data?.priceInfo?.AmountsperMinute} x {bookingDetails?.data?.priceInfo?.Duration} minutes
                   </div>
@@ -201,7 +195,7 @@ function Confirm_Pay() {
           <div className="m-auto my-5">
             {/* <Link to={"/user/payment-status"}> */}
             <div>
-              <button onClick={handlecheckout} className="py-4 font-bold w-full my-6 rounded-md bottom-1 m-auto left-0 right-0 p-2 cursor-pointer bg-backgroundFill-900 text-white text-center">
+              <button onClick={handlecheckout} className="py-2 font-bold w-full my-6 rounded-md bottom-1 m-auto left-0 right-0 p-2 cursor-pointer bg-backgroundFill-900 text-white text-center">
                 Pay
               </button>
             </div>
